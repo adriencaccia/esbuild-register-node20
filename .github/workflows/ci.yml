@@ -1,0 +1,24 @@
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  node-versions:
+    runs-on: "ubuntu-latest"
+    name: "Node ${{ matrix.node-version }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["16", "18", "20.5.0", "20.5.1", "20.6.0", "20.6.1"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - uses: actions/setup-node@v3
+        with:
+          cache: pnpm
+          node-version: ${{ matrix.node-version }}
+      - run: pnpm install --frozen-lockfile --prefer-offline
+      - run: node --loader esbuild-register/loader -r esbuild-register foo.ts
